@@ -15,7 +15,11 @@ class PatientDetails extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: TitleText(title: patient.firstName ?? 'N/A')),
-      body: Padding(
+      body: Container(
+        decoration: BoxDecoration(
+          color: ColorAssets.primaryColor,
+          borderRadius: BorderRadius.circular(10),
+        ),
         padding: EdgeInsets.all(3.h),
         child: Column(
           children: [
@@ -61,6 +65,11 @@ class PatientDetails extends StatelessWidget {
                           RoutesNames.pdfViewer,
                           extra: {'pdfUrl': pdfUrl},
                         );
+                      } else if (fileName == 'pfr004003.pdf') {
+                        context.push(
+                          RoutesNames.pdfViewer,
+                          extra: {'pdfUrl': pdfUrl},
+                        );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(
@@ -84,11 +93,7 @@ class PatientDetails extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text(label),
-        TitleText(
-          title: value,
-          fontSize: 20.sp,
-          color: ColorAssets.primaryColor,
-        ),
+        TitleText(title: value, fontSize: 20.sp, color: ColorAssets.whiteColor),
       ],
     );
   }

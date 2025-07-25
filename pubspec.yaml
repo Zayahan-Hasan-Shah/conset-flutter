@@ -55,6 +55,8 @@ dependencies:
   translator: ^1.0.3+1
   open_file: ^3.5.10
   image_picker: ^1.1.2
+  image: ^4.5.4
+  intl: ^0.20.2
 
 dev_dependencies:
   flutter_test:
