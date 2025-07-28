@@ -1,9 +1,11 @@
 import 'package:conset/models/patient_model.dart';
+import 'package:conset/models/pdf_view_args_model.dart';
 import 'package:conset/routes/routes_names.dart';
 import 'package:conset/screen/auth/login_screen.dart';
 import 'package:conset/screen/bottom_navigation/landing_page.dart';
 import 'package:conset/screen/bottom_navigation/screens/dashboard/dashboard_screen.dart';
 import 'package:conset/screen/bottom_navigation/screens/patient_details/patient_details.dart';
+import 'package:conset/screen/bottom_navigation/screens/patient_details/pdf_saved_view.dart';
 import 'package:conset/screen/bottom_navigation/screens/patient_details/widget/pdf_viewer_screen.dart';
 import 'package:conset/screen/onboarding/splash_screen.dart';
 import 'package:go_router/go_router.dart';
@@ -37,16 +39,21 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: RoutesNames.pdfViewer,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
-        final pdfUrl = extra['pdfUrl'] as String;
-        return PDFViewerScreen(pdfAssetPath: pdfUrl);
+        final args = state.extra as PdfViewerArgs;
+        return PDFViewerScreen(
+          pdfAssetPath: args.pdfUrl,
+          patient: args.patient,
+        );
       },
     ),
     GoRoute(
-      path: RoutesNames.pdfScreen,
+      path: RoutesNames.pdfSavedView,
       builder: (context, state) {
-        final extra = state.extra as Map<String, dynamic>;
-        return PDFViewerScreen(pdfAssetPath: extra['pdfUrl'] as String);
+        final args = state.extra as PdfViewerArgs;
+        return PDFPreviewScreen(
+          filePath: args.pdfUrl,
+          patient: args.patient,
+        );
       },
     ),
   ],

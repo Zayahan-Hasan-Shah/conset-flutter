@@ -1,8 +1,13 @@
+import 'dart:developer';
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:conset/models/patient_model.dart';
+import 'package:conset/models/pdf_view_args_model.dart';
+import 'package:conset/routes/routes_names.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -18,15 +23,16 @@ class PDFVIEWERController {
     required Uint8List husbandSignature,
     required String wifeName,
     required Uint8List wifeSignature,
+    required void Function(String outputPath) onPdfSaved,
   }) async {
     try {
       final ByteData data = await rootBundle.load(formPath);
       List<int> bytes = data.buffer.asUint8List();
 
-      debugPrint('1. $husbandName');
-      debugPrint('2. $husbandAge');
-      debugPrint('3. $husbandCnic');
-      debugPrint('4. $husbandSignature');
+      log('1. $husbandName');
+      log('2. $husbandAge');
+      log('3. $husbandCnic');
+      log('4. $husbandSignature');
 
       // load pdf
       final PdfDocument document = PdfDocument(inputBytes: bytes);
@@ -36,8 +42,8 @@ class PDFVIEWERController {
         startPageIndex: 1,
         endPageIndex: document.pages.count - 1,
       );
-      debugPrint("🔍 Extracted Text from Page : \n$extractedText");
-      debugPrint('Husband Signature Length: ${husbandSignature.length}');
+      log("🔍 Extracted Text from Page : \n$extractedText");
+      log('Husband Signature Length: ${husbandSignature.length}');
       // Find match target
       List<MatchedItem> matches = extractor.findText([
         "Husband's.",
@@ -51,26 +57,24 @@ class PDFVIEWERController {
       ]);
 
       for (MatchedItem word in matches) {
-        debugPrint('These are words : ${word.text}');
+        log('These are words : ${word.text}');
       }
 
       if (matches.isEmpty) {
-        debugPrint('❌ No matching text found in the PDF Document!');
+        log('❌ No matching text found in the PDF Document!');
         document.dispose();
         return;
       }
 
       for (MatchedItem match in matches) {
-        debugPrint(
-          "🔍 Found text: '${match.text}' at Page: ${match.pageIndex}",
-        );
+        log("🔍 Found text: '${match.text}' at Page: ${match.pageIndex}");
 
         final PdfPage page = document.pages[match.pageIndex];
         final Rect bounds = match.bounds;
 
         // Replace text
         if (match.text == "Husband's.") {
-          debugPrint(
+          log(
             "📍 Drawing husband's signature at ${bounds.top}, ${bounds.left}",
           );
           page.graphics.drawImage(
@@ -82,7 +86,7 @@ class PDFVIEWERController {
         if (match.text == "Wife's") {
           page.graphics.drawImage(
             PdfBitmap(wifeSignature),
-            Rect.fromLTWH(bounds.left, bounds.top - 20, 100, 50),
+            Rect.fromLTWH(bounds.left + 70, bounds.top + 20, 100, 50),
           );
         }
 
@@ -108,7 +112,7 @@ class PDFVIEWERController {
             'Pakistan',
             PdfStandardFont(PdfFontFamily.helvetica, 12),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left - 30, bounds.top - 20, 40, 20),
+            bounds: Rect.fromLTWH(bounds.left, bounds.top + 20, 40, 20),
           );
         }
 
@@ -126,7 +130,7 @@ class PDFVIEWERController {
             PdfStandardFont(PdfFontFamily.helvetica, 12),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
             // bounds: Rect.fromLTWH(bounds.left + 100, bounds.top, 150, 20),
-            bounds: Rect.fromLTWH(bounds.left + 100, bounds.top, 150, 20),
+            bounds: Rect.fromLTWH(bounds.left + 70, bounds.top - 10, 150, 20),
           );
         }
         if (match.text == 'Date') {
@@ -160,74 +164,168 @@ class PDFVIEWERController {
       await File(outputPath).writeAsBytes(await document.save());
 
       // ✅ Open the modified PDF
-      OpenFile.open(outputPath);
+      // OpenFile.open(outputPath);
       document.dispose();
 
       print('✅ PDF modified and saved at: $outputPath');
+
+      onPdfSaved(outputPath);
     } catch (e) {
       print('❌ Error modifying PDF: $e');
     }
   }
 
-  Future<void> pfr004003({
+  Future<void> pfr004003Form({
     required String formPath,
     required String witnessName,
     required String patientName,
     required String husbandName,
+    required String attendeeName,
     required Uint8List patientSignature,
-    required Uint8List HusbandSignature,
+    required Uint8List husbandSignature,
     required Uint8List witnessSignature,
+    Patient? patient,
+    required void Function(String outputPath) onPdfSaved,
   }) async {
     try {
       final ByteData data = await rootBundle.load(formPath);
       List<int> bytes = data.buffer.asUint8List();
 
-      debugPrint("✔ PFR004003");
-      debugPrint('1. $witnessName');
-      debugPrint('2. $patientName');
-      debugPrint('3. $husbandName');
-      debugPrint('4. $patientSignature');
+      log("✔ PFR004003 Form Filling Started");
+      log('📌 Witness Name: $witnessName');
+      log('📌 Patient Name: $patientName');
+      log('📌 Husband Name: $husbandName');
+      log('📌 Attendee Name: $attendeeName');
 
-      // load pdf
       final PdfDocument document = PdfDocument(inputBytes: bytes);
       final PdfTextExtractor extractor = PdfTextExtractor(document);
 
-      String extractedText = extractor.extractText(
-        startPageIndex: 1,
-        endPageIndex: document.pages.count - 1,
-      );
-
-      // Find match target
       List<MatchedItem> matches = extractor.findText([
         "permit_________________________________________",
-        "Full Patient's Name", // will use for patient's signature also
+        "Full", "Patient's", "Name", // We will group these
+        "Husband's", // use for husband's name and signature
         "Date",
-        "Husband's Name", // will use for husband's signature
-        "I_____________________________________________",
+        "Name", "of", "witness",
       ]);
 
-      for (MatchedItem word in matches) {
-        debugPrint('These are words : ${word.text}');
-      }
-
       if (matches.isEmpty) {
-        debugPrint('❌ No matching text found in the PDF Document!');
+        log('❌ No matches found!');
         document.dispose();
         return;
       }
 
+      // Helper: Find first match of specific word
+      MatchedItem? find(String text) =>
+          matches.firstWhere((e) => e.text == text);
+
       for (MatchedItem match in matches) {
-        debugPrint(
-          "🔍 Found text: '${match.text}' at Page: ${match.pageIndex}",
+        final page = document.pages[match.pageIndex];
+        // ✅ 1. Attendee Name
+        final permitMatch = find(
+          "permit_________________________________________",
         );
+        if (permitMatch != null) {
+          final bounds = permitMatch.bounds;
+          page.graphics.drawString(
+            attendeeName,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 20, bounds.top - 10, 200, 20),
+          );
+        }
 
-        final PdfPage page = document.pages[match.pageIndex];
-        final Rect bounds = match.bounds;
+        // ✅ 2. Patient Name & Signature (use "Full" as anchor)
+        final patientAnchor = find("Full");
+        if (patientAnchor != null) {
+          final bounds = patientAnchor.bounds;
+          page.graphics.drawString(
+            patientName,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 80, bounds.top, 200, 20),
+          );
+          page.graphics.drawImage(
+            PdfBitmap(patientSignature),
+            Rect.fromLTWH(bounds.left + 80, bounds.top + 10, 100, 50),
+          );
+        }
 
-        
+        // ✅ 3. Witness Name & Signature
+        final witnessMatch = find("witness");
+        if (witnessMatch != null) {
+          final page = document.pages[witnessMatch.pageIndex!];
+          final bounds = witnessMatch.bounds!;
+          page.graphics.drawString(
+            witnessName,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 250, bounds.top - 30, 200, 20),
+          );
+          page.graphics.drawImage(
+            PdfBitmap(witnessSignature),
+            Rect.fromLTWH(bounds.left + 300, bounds.top - 30, 120, 50),
+          );
 
+          // Date for witness
+          final String witnessDate = DateFormat(
+            'dd/MM/yyyy',
+          ).format(DateTime.now());
+          page.graphics.drawString(
+            witnessDate,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 200, bounds.top, 150, 20),
+          );
+        }
 
+        // ✅ 4. Husband Name & Signature
+        final husbandMatch = find("Husband's");
+        if (husbandMatch != null) {
+          final bounds = husbandMatch.bounds;
+          page.graphics.drawString(
+            husbandName,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 80, bounds.top, 200, 20),
+          );
+          page.graphics.drawImage(
+            PdfBitmap(husbandSignature),
+            Rect.fromLTWH(bounds.left + 80, bounds.top + 10, 100, 50),
+          );
+          final String husbandDate = DateFormat(
+            'dd/MM/yyyy',
+          ).format(DateTime.now());
+          page.graphics.drawString(
+            husbandDate,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 80, bounds.top + 20, 150, 20),
+          );
+        }
+
+        // ✅ 5. Date
+        final dateMatch = find("Date");
+        if (dateMatch != null) {
+          final bounds = dateMatch.bounds;
+          final String currentDate = DateFormat(
+            'dd/MM/yyyy',
+          ).format(DateTime.now());
+          page.graphics.drawString(
+            currentDate,
+            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            bounds: Rect.fromLTWH(bounds.left + 40, bounds.top, 150, 20),
+          );
+        }
       }
-    } catch (e) {}
+
+      // ✅ Save PDF
+      Directory dir = await getApplicationDocumentsDirectory();
+      String outputPath = '${dir.path}/pfr004003_signed_01.pdf';
+      await File(outputPath).writeAsBytes(await document.save());
+
+      // OpenFile.open(outputPath);
+      document.dispose();
+
+      print('✅ PDF modified and saved at: $outputPath');
+
+      onPdfSaved(outputPath);
+    } catch (e, st) {
+      print('❌ Error modifying PDF: $e');
+      print(st);
+    }
   }
 }

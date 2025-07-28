@@ -9,5 +9,6 @@ class RoutesNames {
   static const dashboardScreen = '/dashboard';
   static const patientDetailScreen = '/patient_detail';
   static const pdfViewer = '/pdf-viewer';
-  static const pdfScreen = '/pdf-screen';
+  static const pdfSavedView = '/pdf_saved';
+  // static const pdfScreen = '/pdf-screen';
 }

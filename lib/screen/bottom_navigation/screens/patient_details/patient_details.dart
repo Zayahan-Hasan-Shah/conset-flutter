@@ -1,5 +1,8 @@
+import 'dart:developer';
+
 import 'package:conset/core/color_assets/color_assets.dart';
 import 'package:conset/models/patient_model.dart';
+import 'package:conset/models/pdf_view_args_model.dart';
 import 'package:conset/routes/routes_names.dart';
 import 'package:conset/widgets/common_widgets/title_text.dart';
 import 'package:flutter/material.dart';
@@ -14,7 +17,7 @@ class PatientDetails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: TitleText(title: patient.firstName ?? 'N/A')),
+      appBar: AppBar(title: TitleText(title: patient.firstName)),
       body: Container(
         decoration: BoxDecoration(
           color: ColorAssets.primaryColor,
@@ -23,11 +26,11 @@ class PatientDetails extends StatelessWidget {
         padding: EdgeInsets.all(3.h),
         child: Column(
           children: [
-            _buildInfoRow('MRNO', patient.mrNo ?? 'N/A'),
+            _buildInfoRow('MRNO', patient.mrNo ),
             _buildDivider(),
-            _buildInfoRow('First Name', patient.firstName ?? 'N/A'),
+            _buildInfoRow('First Name', patient.firstName ),
             _buildDivider(),
-            _buildInfoRow('Last Name', patient.lastName ?? 'N/A'),
+            _buildInfoRow('Last Name', patient.lastName ),
             _buildDivider(),
             _buildInfoRow('Sex', patient.sex.isNotEmpty ? patient.sex : 'N/A'),
             _buildDivider(),
@@ -63,12 +66,19 @@ class PatientDetails extends StatelessWidget {
                       if (fileName == 'pfr004001.pdf') {
                         context.push(
                           RoutesNames.pdfViewer,
-                          extra: {'pdfUrl': pdfUrl},
+                          extra: PdfViewerArgs(pdfUrl: pdfUrl),
+                          // extra: {'pdfUrl': pdfUrl, },
                         );
                       } else if (fileName == 'pfr004003.pdf') {
+                        log(
+                          'Passing pateint from patient detail in pfr004003.pdf : ${patient.fullName}',
+                        );
                         context.push(
                           RoutesNames.pdfViewer,
-                          extra: {'pdfUrl': pdfUrl},
+                          extra: PdfViewerArgs(
+                            pdfUrl: pdfUrl,
+                            patient: patient,
+                          ),
                         );
                       } else {
                         ScaffoldMessenger.of(context).showSnackBar(

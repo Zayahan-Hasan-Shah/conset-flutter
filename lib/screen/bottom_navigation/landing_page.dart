@@ -15,7 +15,7 @@ class LandingPage extends ConsumerStatefulWidget {
 class _LandingPageState extends ConsumerState<LandingPage> {
   @override
   Widget build(BuildContext context) {
-    final navstate = ref.watch(bottomNavigationProvider);
+    // final navstate = ref.watch(bottomNavigationProvider);
     final navController = ref.watch(bottomNavigationProvider.notifier);
     return Scaffold(
       appBar: CustomAppBar(
