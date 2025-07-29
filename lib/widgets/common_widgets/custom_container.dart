@@ -16,7 +16,7 @@ class CustomContainer extends StatelessWidget {
   final String? nationality;
   final String? phone;
   final bool? isVIP;
-  final List<String>? pdfUrls;
+  final List<Map<String, dynamic>>? pdfUrls;
   CustomContainer({
     this.mrNo,
     this.firstName,

@@ -1,96 +1,154 @@
-import 'dart:developer';
-
+import 'package:conset/controllers/pdf_controller/patient_form_controller.dart';
 import 'package:conset/core/color_assets/color_assets.dart';
 import 'package:conset/models/patient_model.dart';
 import 'package:conset/models/pdf_view_args_model.dart';
 import 'package:conset/routes/routes_names.dart';
+import 'package:conset/screen/bottom_navigation/screens/patient_details/widget/custom_patient_container.dart';
 import 'package:conset/widgets/common_widgets/title_text.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:sizer/sizer.dart';
 
-class PatientDetails extends StatelessWidget {
+class PatientDetails extends ConsumerStatefulWidget {
   final Patient patient;
 
   const PatientDetails({super.key, required this.patient});
 
   @override
+  ConsumerState<PatientDetails> createState() => _PatientDetailsState();
+}
+
+class _PatientDetailsState extends ConsumerState<PatientDetails> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(() {
+      ref
+          .read(patientFormsProvider(widget.patient.mrNo).notifier)
+          .loadForms(widget.patient.pdfUrls);
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final forms = ref.watch(patientFormsProvider(widget.patient.mrNo));
+    final formsNotifier = ref.read(
+      patientFormsProvider(widget.patient.mrNo).notifier,
+    );
+    final signedForms =
+        forms.where((form) => form['isSigned'] == true).toList();
+
     return Scaffold(
-      appBar: AppBar(title: TitleText(title: patient.firstName)),
-      body: Container(
-        decoration: BoxDecoration(
-          color: ColorAssets.primaryColor,
-          borderRadius: BorderRadius.circular(10),
+      appBar: AppBar(
+        title: TitleText(title: widget.patient.firstName),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () {
+            context.go(RoutesNames.dashboardScreen);
+          },
         ),
-        padding: EdgeInsets.all(3.h),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: ColorAssets.whiteColor,
+        onPressed: _showUnsignedFormsDialog,
+        child: const Icon(Icons.file_copy, color: ColorAssets.primaryColor),
+      ),
+      body: Container(
+        color: ColorAssets.primaryColor,
+        padding: const EdgeInsets.all(12),
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildInfoRow('MRNO', patient.mrNo ),
+            CustomPatientContainer(title: 'MRNO', item: widget.patient.mrNo),
             _buildDivider(),
-            _buildInfoRow('First Name', patient.firstName ),
-            _buildDivider(),
-            _buildInfoRow('Last Name', patient.lastName ),
-            _buildDivider(),
-            _buildInfoRow('Sex', patient.sex.isNotEmpty ? patient.sex : 'N/A'),
-            _buildDivider(),
-            _buildInfoRow(
-              'Phone',
-              patient.phone.isNotEmpty ? patient.phone : 'N/A',
+            CustomPatientContainer(
+              title: 'Full Name',
+              item: widget.patient.fullName,
             ),
             _buildDivider(),
-            if (patient.isVIP == true)
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            CustomPatientContainer(
+              title: 'First Name',
+              item: widget.patient.firstName,
+            ),
+            _buildDivider(),
+            CustomPatientContainer(
+              title: 'Middle Name',
+              item: widget.patient.middleName,
+            ),
+            _buildDivider(),
+            CustomPatientContainer(
+              title: 'Last Name',
+              item: widget.patient.lastName,
+            ),
+            _buildDivider(),
+            CustomPatientContainer(title: 'SEX', item: widget.patient.sex),
+            _buildDivider(),
+            CustomPatientContainer(
+              title: 'Phone Number',
+              item: widget.patient.phone,
+            ),
+            _buildDivider(),
+            CustomPatientContainer(
+              title: 'VIP Patient',
+              item: widget.patient.isVIP ? 'YES' : 'NO',
+            ),
+            _buildDivider(),
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('VIP Patient'),
-                  Icon(Icons.star, color: Colors.yellow, size: 20),
+                  TitleText(
+                    title: 'FORMS',
+                    color: ColorAssets.whiteColor,
+                    weight: FontWeight.bold,
+                    fontSize: 16.sp,
+                  ),
                 ],
               ),
-            SizedBox(height: 2.h),
-            Text(
-              'Forms',
-              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14.sp),
             ),
-            Expanded(
-              child: ListView.builder(
-                itemCount: patient.pdfUrls.length,
-                itemBuilder: (context, index) {
-                  final pdfUrl = patient.pdfUrls[index];
-                  final fileName = pdfUrl.split('/').last.toLowerCase();
-
-                  return ListTile(
-                    title: Text('$fileName'),
-                    trailing: Icon(Icons.picture_as_pdf, color: Colors.red),
-                    onTap: () {
-                      if (fileName == 'pfr004001.pdf') {
-                        context.push(
-                          RoutesNames.pdfViewer,
-                          extra: PdfViewerArgs(pdfUrl: pdfUrl),
-                          // extra: {'pdfUrl': pdfUrl, },
-                        );
-                      } else if (fileName == 'pfr004003.pdf') {
-                        log(
-                          'Passing pateint from patient detail in pfr004003.pdf : ${patient.fullName}',
-                        );
-                        context.push(
-                          RoutesNames.pdfViewer,
-                          extra: PdfViewerArgs(
-                            pdfUrl: pdfUrl,
-                            patient: patient,
-                          ),
-                        );
-                      } else {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(
-                            content: Text('Unsupported form: $fileName'),
-                          ),
-                        );
-                      }
-                    },
-                  );
-                },
-              ),
+            SingleChildScrollView(
+              scrollDirection: Axis.vertical,
+              child:
+                  signedForms.isEmpty
+                      ? Center(
+                        child: TitleText(
+                          title: 'No signed forms yet.',
+                          color: ColorAssets.whiteColor,
+                          weight: FontWeight.bold,
+                        ),
+                      )
+                      : ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: signedForms.length,
+                        itemBuilder: (context, index) {
+                          final form = signedForms[index];
+                          final formPath = form['pdf'];
+                          final fileName =
+                              formPath.split('/').last.toLowerCase();
+                          return ListTile(
+                            title: TitleText(
+                              title: fileName,
+                              color: ColorAssets.whiteColor,
+                            ),
+                            trailing: const Icon(
+                              Icons.picture_as_pdf_outlined,
+                              color: Colors.red,
+                            ),
+                            onTap: () {
+                              context.push(
+                                RoutesNames.pdfSavedView,
+                                extra: PdfViewerArgs(
+                                  pdfUrl: formPath,
+                                  patient: widget.patient,
+                                ),
+                              );
+                            },
+                          );
+                        },
+                      ),
             ),
           ],
         ),
@@ -98,17 +156,86 @@ class PatientDetails extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(label),
-        TitleText(title: value, fontSize: 20.sp, color: ColorAssets.whiteColor),
-      ],
-    );
-  }
-
   Widget _buildDivider() {
     return Divider(color: ColorAssets.blackColor.withOpacity(0.6));
+  }
+
+  void _showUnsignedFormsDialog() {
+    final forms = ref.read(patientFormsProvider(widget.patient.mrNo));
+    final formsNotifier = ref.read(
+      patientFormsProvider(widget.patient.mrNo).notifier,
+    );
+    final unsignedForms =
+        forms.where((form) => form['isSigned'] == false).toList();
+
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+      ),
+      builder: (_) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TitleText(
+                title: 'Unsigned Forms of Patient',
+                color: ColorAssets.blackColor,
+                fontSize: 18,
+                weight: FontWeight.bold,
+              ),
+              const SizedBox(height: 12),
+              if (unsignedForms.isEmpty)
+                const Center(child: Text('All forms have been signed.')),
+              if (unsignedForms.isNotEmpty)
+                ...unsignedForms.map((form) {
+                  final pdfUrl = form['pdf'];
+                  final fileName = pdfUrl.split('/').last.toLowerCase();
+
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.picture_as_pdf,
+                      color: ColorAssets.primaryColor,
+                    ),
+                    title: TitleText(
+                      title: fileName,
+                      color: ColorAssets.primaryColor,
+                    ),
+                    subtitle: TitleText(
+                      title: 'Unsigned',
+                      color: ColorAssets.primaryColor.withOpacity(0.6),
+                    ),
+                    onTap: () async {
+                      Navigator.pop(context);
+
+                      final result = await context.push<String>(
+                        RoutesNames.pdfViewer,
+                        extra: PdfViewerArgs(
+                          pdfUrl: pdfUrl,
+                          patient: widget.patient,
+                        ),
+                      );
+
+                      if (!mounted || result == null) return;
+
+                      formsNotifier.markFormAsSigned(pdfUrl, result);
+                    },
+                  );
+                }),
+              // const Divider(),
+              // ListTile(
+              //   leading: const Icon(Icons.add),
+              //   title: const Text('Add New Form'),
+              //   onTap: () {
+              //     Navigator.pop(context);
+              //   },
+              // ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }

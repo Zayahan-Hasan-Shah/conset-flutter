@@ -14,8 +14,8 @@ List<Patient> dummyPatients = [
     phone: '7567567423423',
     isVIP: false,
     pdfUrls: [
-      FormAssets.pfr004001,
-      FormAssets.pfr004003,
+      {'id': 1, 'isSigned': false, 'pdf': FormAssets.pfr004001},
+      {'id': 2, 'isSigned': false, 'pdf': FormAssets.pfr004003},
     ],
   ),
   Patient(
@@ -30,7 +30,7 @@ List<Patient> dummyPatients = [
     phone: '0501234567',
     isVIP: true,
     pdfUrls: [
-      FormAssets.pfr004001,
+      {'id': 1, 'isSigned': false, 'pdf': FormAssets.pfr004001},
     ],
   ),
   Patient(
@@ -45,8 +45,8 @@ List<Patient> dummyPatients = [
     phone: '0509988776',
     isVIP: false,
     pdfUrls: [
-      FormAssets.pfr004001,
-      FormAssets.pfr004003, 
+      {'id': 1, 'isSigned': false, 'pdf': FormAssets.pfr004001},
+      {'id': 2, 'isSigned': true, 'pdf': FormAssets.pfr004003},
     ],
   ),
 ];

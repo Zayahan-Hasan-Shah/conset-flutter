@@ -1,11 +1,13 @@
 import 'dart:developer';
 import 'dart:typed_data';
 import 'package:conset/controllers/pdf_controller/pdf_viewer_controller.dart';
+import 'package:conset/core/color_assets/color_assets.dart';
 import 'package:conset/core/form_assets/form_assets.dart';
 import 'package:conset/models/patient_model.dart';
 import 'package:conset/models/pdf_view_args_model.dart';
 import 'package:conset/routes/routes_names.dart';
 import 'package:conset/screen/bottom_navigation/screens/patient_details/widget/input_dialog.dart';
+import 'package:conset/utils/global.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -53,8 +55,6 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
 
     if (result == null) return;
 
-    final snack = ScaffoldMessenger.of(context);
-
     if (widget.pdfAssetPath == FormAssets.pfr004001) {
       final husbandName = result['husbandName'] as String?;
       final husbandAge = result['husbandAge'] as String?;
@@ -71,8 +71,11 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
           ].any((e) => e == null || e.isEmpty) ||
           husbandSig == null ||
           wifeSig == null) {
-        snack.showSnackBar(
-          const SnackBar(content: Text("⚠️ Missing required fields.")),
+        customSnackbar(
+          context,
+          'Warning',
+          '⚠️ Missing required fields.',
+          ColorAssets.warningColor,
         );
         return;
       }
@@ -87,15 +90,29 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
         wifeSignature: wifeSig,
         onPdfSaved: (outputPath) {
           if (!mounted) return;
+
+          // ✅ Update patient's pdfUrls
+          final index = widget.patient?.pdfUrls.indexWhere(
+            (form) => form['pdf'] == widget.pdfAssetPath,
+          );
+
+          if (index != null && index != -1) {
+            widget.patient!.pdfUrls[index]['pdf'] = outputPath;
+            widget.patient!.pdfUrls[index]['isSigned'] = true;
+          }
+
           context.push(
             RoutesNames.pdfSavedView,
-            extra: PdfViewerArgs(pdfUrl: outputPath),
+            extra: PdfViewerArgs(pdfUrl: outputPath, patient: widget.patient),
           );
         },
       );
 
-      snack.showSnackBar(
-        const SnackBar(content: Text("✅ Form pfr004001 signed successfully.")),
+      customSnackbar(
+        context,
+        'Successfully PDF  Signed',
+        '✅ Form pfr004001 signed successfully.',
+        ColorAssets.greenColor,
       );
     } else if (widget.pdfAssetPath == FormAssets.pfr004003) {
       final witnessName = result['witnessName'] as String?;
@@ -115,8 +132,11 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
           patientSig == null ||
           husbandSig == null ||
           witnessSig == null) {
-        snack.showSnackBar(
-          const SnackBar(content: Text("⚠️ Missing required fields.")),
+        customSnackbar(
+          context,
+          'Warning',
+          '⚠️ Missing required fields.',
+          ColorAssets.warningColor,
         );
         return;
       }
@@ -132,15 +152,28 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
         attendeeName: attendeeName!,
         onPdfSaved: (outputPath) {
           if (!mounted) return;
-          context.push(
+
+          // ✅ Update patient's pdfUrls
+          final index = widget.patient?.pdfUrls.indexWhere(
+            (form) => form['pdf'] == widget.pdfAssetPath,
+          );
+          log('Updated patient pdfurls : $index');
+
+          if (index != null && index != -1) {
+            widget.patient!.pdfUrls[index]['pdf'] = outputPath;
+            widget.patient!.pdfUrls[index]['isSigned'] = true;
+          }
+          context.go(
             RoutesNames.pdfSavedView,
             extra: PdfViewerArgs(pdfUrl: outputPath, patient: widget.patient),
           );
         },
       );
-
-      snack.showSnackBar(
-        const SnackBar(content: Text("✅ Form pfr004003 signed successfully.")),
+      customSnackbar(
+        context,
+        'Successfully PDF  Signed',
+        '✅ Form pfr004003 signed successfully.',
+        ColorAssets.greenColor,
       );
     }
   }

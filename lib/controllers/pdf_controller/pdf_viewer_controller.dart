@@ -1,13 +1,8 @@
 import 'dart:developer';
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:conset/models/patient_model.dart';
-import 'package:conset/models/pdf_view_args_model.dart';
-import 'package:conset/routes/routes_names.dart';
-import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:go_router/go_router.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:syncfusion_flutter_pdf/pdf.dart';
@@ -50,10 +45,11 @@ class PDFVIEWERController {
         "Wife's",
         "I________________",
         "nationality_______________",
-        "_________years old,",
+        "years",
         "Number_______________",
         "type",
         "Date",
+        "Name of Guardian/Substitue Conset Giver",
       ]);
 
       for (MatchedItem word in matches) {
@@ -67,6 +63,9 @@ class PDFVIEWERController {
       }
 
       for (MatchedItem match in matches) {
+        if (extractedText.toLowerCase().contains('year')) {
+          log("🟡 Detected text containing 'year': possibly mislabeled.");
+        }
         log("🔍 Found text: '${match.text}' at Page: ${match.pageIndex}");
 
         final PdfPage page = document.pages[match.pageIndex];
@@ -79,7 +78,7 @@ class PDFVIEWERController {
           );
           page.graphics.drawImage(
             PdfBitmap(husbandSignature),
-            Rect.fromLTWH(bounds.left + 20, bounds.top, 100, 50),
+            Rect.fromLTWH(bounds.left + 40, bounds.top + 20, 100, 50),
           );
         }
 
@@ -93,48 +92,48 @@ class PDFVIEWERController {
         if (match.text == "I________________") {
           page.graphics.drawString(
             husbandName,
-            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            PdfStandardFont(PdfFontFamily.helvetica, 10),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left + 8, bounds.top - 10, 200, 20),
+            bounds: Rect.fromLTWH(bounds.left + 8, bounds.top - 8, 200, 20),
           );
         }
-        if (match.text == " _________years old,") {
+        if (match.text == "years") {
           page.graphics.drawString(
             husbandAge,
-            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            PdfStandardFont(PdfFontFamily.helvetica, 10),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left - 50, bounds.top, 40, 20),
+            bounds: Rect.fromLTWH(bounds.left -20, bounds.top - 8, 40, 20),
           );
         }
 
         if (match.text == 'nationality_______________') {
           page.graphics.drawString(
             'Pakistan',
-            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            PdfStandardFont(PdfFontFamily.helvetica, 10),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left, bounds.top + 20, 40, 20),
+            bounds: Rect.fromLTWH(bounds.left + 40, bounds.top - 20, 40, 20),
           );
         }
 
         if (match.text == "Number_______________") {
           page.graphics.drawString(
             husbandCnic,
-            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            PdfStandardFont(PdfFontFamily.helvetica, 10),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left + 70, bounds.top - 8, 150, 20),
+            bounds: Rect.fromLTWH(bounds.left + 30, bounds.top + 15, 150, 20),
           );
         }
         if (match.text == "type") {
           page.graphics.drawString(
             'Type',
-            PdfStandardFont(PdfFontFamily.helvetica, 12),
+            PdfStandardFont(PdfFontFamily.helvetica, 10),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
             // bounds: Rect.fromLTWH(bounds.left + 100, bounds.top, 150, 20),
-            bounds: Rect.fromLTWH(bounds.left + 70, bounds.top - 10, 150, 20),
+            bounds: Rect.fromLTWH(bounds.left + 20, bounds.top - 6, 150, 20),
           );
         }
         if (match.text == 'Date') {
-          final font = PdfStandardFont(PdfFontFamily.helvetica, 12);
+          final font = PdfStandardFont(PdfFontFamily.helvetica, 10);
           final brush = PdfSolidBrush(PdfColor(0, 0, 0));
           final String currentDate = DateFormat(
             'dd/MM/yyyy',
@@ -152,6 +151,16 @@ class PDFVIEWERController {
             ),
           );
         }
+
+        if (match.text == 'Name of Guardian/Substitue Conset Giver') {
+          log(
+            "📍 Drawing husband's signature at Guardian ${bounds.top}, ${bounds.left}",
+          );
+          page.graphics.drawImage(
+            PdfBitmap(husbandSignature),
+            Rect.fromLTWH(bounds.left + 80, bounds.top + 90, 100, 50),
+          );
+        }
       }
 
       final di1r = await getTemporaryDirectory();
@@ -167,11 +176,11 @@ class PDFVIEWERController {
       // OpenFile.open(outputPath);
       document.dispose();
 
-      print('✅ PDF modified and saved at: $outputPath');
+      log('✅ PDF modified and saved at: $outputPath');
 
       onPdfSaved(outputPath);
     } catch (e) {
-      print('❌ Error modifying PDF: $e');
+      log('❌ Error modifying PDF: $e');
     }
   }
 
@@ -320,12 +329,12 @@ class PDFVIEWERController {
       // OpenFile.open(outputPath);
       document.dispose();
 
-      print('✅ PDF modified and saved at: $outputPath');
+      log('✅ PDF modified and saved at: $outputPath');
 
       onPdfSaved(outputPath);
     } catch (e, st) {
-      print('❌ Error modifying PDF: $e');
-      print(st);
+      log('❌ Error modifying PDF: $e');
+      log('$st');
     }
   }
 }

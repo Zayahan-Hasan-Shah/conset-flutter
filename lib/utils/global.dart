@@ -7,8 +7,12 @@ import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:shimmer/shimmer.dart';
 
-
-void customSnackbar(BuildContext context, String title, String message, Color backgroundColor) {
+void customSnackbar(
+  BuildContext context,
+  String title,
+  String message,
+  Color backgroundColor,
+) {
   final snackBar = SnackBar(
     behavior: SnackBarBehavior.floating,
     backgroundColor: backgroundColor,
@@ -18,13 +22,13 @@ void customSnackbar(BuildContext context, String title, String message, Color ba
       children: [
         Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style: const TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
         const SizedBox(height: 4),
-        Text(
-          message,
-          style: const TextStyle(color: Colors.white),
-        ),
+        Text(message, style: const TextStyle(color: Colors.white)),
       ],
     ),
     duration: const Duration(seconds: 3),
@@ -36,7 +40,6 @@ void customSnackbar(BuildContext context, String title, String message, Color ba
     ..hideCurrentSnackBar()
     ..showSnackBar(snackBar);
 }
-
 
 String? validator(String? value) {
   if (value == null || value.isEmpty) {
@@ -59,16 +62,11 @@ Future<void> permission() async {
     var androidInfo = await DeviceInfoPlugin().androidInfo;
     var sdkInt = androidInfo.version.sdkInt; // SDK, example: 31
 
-    await [
-      Permission.notification,
-      Permission.storage,
-    ].request();
+    await [Permission.notification, Permission.storage].request();
     if (sdkInt >= 30) {
       await Permission.manageExternalStorage.request();
     } else {
-      await [
-        Permission.manageExternalStorage,
-      ].request();
+      await [Permission.manageExternalStorage].request();
     }
   } else if (Platform.isIOS) {
     final status = await Permission.notification.status;
@@ -119,4 +117,22 @@ Widget buildShimmerEffect() {
       ],
     ),
   );
+}
+
+String? numberValidator(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'This field is required';
+  } else if (!RegExp(r'^\d+$').hasMatch(value.trim())) {
+    return 'Only numeric values allowed';
+  }
+  return null;
+}
+
+String? cnicValidator(String? value) {
+  if (value == null || value.trim().isEmpty) {
+    return 'CNIC is required';
+  } else if (!RegExp(r'^\d{13}$').hasMatch(value.trim())) {
+    return 'Enter a valid 13-digit CNIC';
+  }
+  return null;
 }

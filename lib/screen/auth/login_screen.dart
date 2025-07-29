@@ -9,7 +9,6 @@ import 'package:conset/utils/global.dart';
 import 'package:conset/widgets/common_widgets/bottom_curve_clipper.dart';
 import 'package:conset/widgets/common_widgets/custom_text_form.dart';
 import 'package:conset/widgets/common_widgets/fractinally_elevated_button.dart';
-import 'package:conset/widgets/common_widgets/guide_text.dart';
 import 'package:conset/widgets/common_widgets/heading_text.dart';
 import 'package:conset/widgets/common_widgets/title_text.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -70,16 +69,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           AppSize.vrtSpace(0.5.h),
                           passTextField(false),
                           AppSize.vrtSpace(1.5.h),
-                          // Align(
-                          //   alignment: Alignment.centerRight,
-                          //   child: GuideText(
-                          //     text1: 'Not Registered?',
-                          //     text2: ' Click to signup',
-                          //     ontap: () {
-                          //       // context.push(RouteNames.signup);
-                          //     },
-                          //   ),
-                          // ),
                           AppSize.vrtSpace(1.5.h),
                           loginButton(),
                           AppSize.vrtSpace(1.h),

@@ -6,6 +6,7 @@ class ColorAssets {
   static const blackColor = Colors.black;
   static const whiteColor = Colors.white;
   static const greenColor = Colors.green;
+  static const warningColor = Colors.amberAccent;
 
   // shimmer colors (used in loading indicators)
   static var shimmerBaseColor = Colors.grey[300]; 

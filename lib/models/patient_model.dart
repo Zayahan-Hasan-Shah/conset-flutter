@@ -9,7 +9,7 @@ class Patient {
   final String nationality;
   final String phone;
   final bool isVIP;
-  final List<String> pdfUrls;
+  final List<Map<String,dynamic>> pdfUrls;
 
   Patient({
     required this.mrNo,

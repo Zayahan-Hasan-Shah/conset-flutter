@@ -9,7 +9,7 @@ class TitleText extends StatelessWidget {
   final TextAlign? textAlign;
   final bool? isUnderLine;
 
-  TitleText({
+  const TitleText({
     Key? key,
     required this.title,
     this.style,

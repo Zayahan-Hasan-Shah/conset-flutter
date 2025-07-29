@@ -18,10 +18,10 @@ class _LandingPageState extends ConsumerState<LandingPage> {
     // final navstate = ref.watch(bottomNavigationProvider);
     final navController = ref.watch(bottomNavigationProvider.notifier);
     return Scaffold(
-      appBar: CustomAppBar(
-        text: navController.title,
-        backgroundColor: ColorAssets.primaryColor,
-      ),
+      // appBar: CustomAppBar(
+      //   text: navController.title,
+      //   backgroundColor: ColorAssets.primaryColor,
+      // ),
       body: PopScope(canPop: false,child: navController.getScreen),
 
     );
