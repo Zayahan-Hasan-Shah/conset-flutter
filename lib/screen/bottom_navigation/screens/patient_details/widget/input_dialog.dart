@@ -127,6 +127,7 @@ class _InputDialogState extends ConsumerState<InputDialog> {
                       'husbandAge': husbandAge.text.trim(),
                       'husbandCnic': husbandCnic.text.trim(),
                       'nationality': 'Pakistani',
+                      'idType': selectedIdType,
                       'husbandIdType': selectedIdType,
                       'husbandSignature': husbandSig,
                       'wifeName': wifeName.text.trim(),
@@ -135,7 +136,7 @@ class _InputDialogState extends ConsumerState<InputDialog> {
                   } else if (widget.formId == FormAssets.pfr004003) {
                     if (husbandSig == null ||
                         witnessSig == null ||
-                        patientSig == null) {
+                        patientSig == null ) {
                       loadingNotifier.setLoading(false);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(

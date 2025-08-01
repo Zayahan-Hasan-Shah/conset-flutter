@@ -60,6 +60,7 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
       final husbandAge = result['husbandAge'] as String?;
       final husbandCnic = result['husbandCnic'] as String?;
       final wifeName = result['wifeName'] as String?;
+      final idType = result['idType'] as String;
       final Uint8List? husbandSig = result['husbandSignature'];
       final Uint8List? wifeSig = result['wifeSignature'];
 
@@ -68,6 +69,7 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
             husbandAge,
             husbandCnic,
             wifeName,
+            idType,
           ].any((e) => e == null || e.isEmpty) ||
           husbandSig == null ||
           wifeSig == null) {
@@ -86,6 +88,7 @@ class _PDFViewerScreenState extends ConsumerState<PDFViewerScreen> {
         husbandAge: husbandAge!,
         husbandCnic: husbandCnic!,
         husbandSignature: husbandSig,
+        idType: idType,
         wifeName: wifeName!,
         wifeSignature: wifeSig,
         onPdfSaved: (outputPath) {

@@ -16,6 +16,7 @@ class PDFVIEWERController {
     required String husbandAge,
     required String husbandCnic,
     required Uint8List husbandSignature,
+    required String idType,
     required String wifeName,
     required Uint8List wifeSignature,
     required void Function(String outputPath) onPdfSaved,
@@ -45,7 +46,8 @@ class PDFVIEWERController {
         "Wife's",
         "I________________",
         "nationality_______________",
-        "years",
+        // "years",
+        "____years",
         "Number_______________",
         "type",
         "Date",
@@ -92,48 +94,49 @@ class PDFVIEWERController {
         if (match.text == "I________________") {
           page.graphics.drawString(
             husbandName,
-            PdfStandardFont(PdfFontFamily.helvetica, 10),
+            PdfStandardFont(PdfFontFamily.helvetica, 8),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left + 8, bounds.top - 8, 200, 20),
+            bounds: Rect.fromLTWH(bounds.left + 8, bounds.top - 6, 200, 20),
           );
         }
-        if (match.text == "years") {
+        if (match.text == "____years") {
+          log("📍 Writing years at : top ${bounds.top}, left ${bounds.left}");
           page.graphics.drawString(
             husbandAge,
-            PdfStandardFont(PdfFontFamily.helvetica, 10),
+            PdfStandardFont(PdfFontFamily.helvetica, 8),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left -20, bounds.top - 8, 40, 20),
+            bounds: Rect.fromLTWH(bounds.left - 20, bounds.top - 4, 40, 20),
           );
         }
 
         if (match.text == 'nationality_______________') {
           page.graphics.drawString(
             'Pakistan',
-            PdfStandardFont(PdfFontFamily.helvetica, 10),
+            PdfStandardFont(PdfFontFamily.helvetica, 8),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left + 40, bounds.top - 20, 40, 20),
+            bounds: Rect.fromLTWH(bounds.left + 50, bounds.top - 6, 40, 20),
           );
         }
 
         if (match.text == "Number_______________") {
           page.graphics.drawString(
             husbandCnic,
-            PdfStandardFont(PdfFontFamily.helvetica, 10),
+            PdfStandardFont(PdfFontFamily.helvetica, 8),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
-            bounds: Rect.fromLTWH(bounds.left + 30, bounds.top + 15, 150, 20),
+            bounds: Rect.fromLTWH(bounds.left + 30, bounds.top - 6, 150, 20),
           );
         }
         if (match.text == "type") {
           page.graphics.drawString(
-            'Type',
-            PdfStandardFont(PdfFontFamily.helvetica, 10),
+            idType,
+            PdfStandardFont(PdfFontFamily.helvetica, 8),
             brush: PdfSolidBrush(PdfColor(0, 0, 0)),
             // bounds: Rect.fromLTWH(bounds.left + 100, bounds.top, 150, 20),
             bounds: Rect.fromLTWH(bounds.left + 20, bounds.top - 6, 150, 20),
           );
         }
         if (match.text == 'Date') {
-          final font = PdfStandardFont(PdfFontFamily.helvetica, 10);
+          final font = PdfStandardFont(PdfFontFamily.helvetica, 8);
           final brush = PdfSolidBrush(PdfColor(0, 0, 0));
           final String currentDate = DateFormat(
             'dd/MM/yyyy',
@@ -169,7 +172,8 @@ class PDFVIEWERController {
       OpenFile.open(testFile.path);
 
       Directory dir = await getApplicationDocumentsDirectory();
-      String outputPath = '${dir.path}/pfr004001_signed_01.pdf';
+      String outputPath =
+          '${dir.path}/GENERAL_CONSENT_FOR_TREATMENT_signed_01.pdf';
       await File(outputPath).writeAsBytes(await document.save());
 
       // ✅ Open the modified PDF
@@ -323,7 +327,8 @@ class PDFVIEWERController {
 
       // ✅ Save PDF
       Directory dir = await getApplicationDocumentsDirectory();
-      String outputPath = '${dir.path}/pfr004003_signed_01.pdf';
+      String outputPath =
+          '${dir.path}/INFORMED_CONSENT_FOR_SURGICAL,INVASIVE,MEDICAL_AND_INVASIVE_DIAGNOSTIC_signed_01.pdf';
       await File(outputPath).writeAsBytes(await document.save());
 
       // OpenFile.open(outputPath);

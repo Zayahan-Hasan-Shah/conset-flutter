@@ -8,6 +8,7 @@ class TitleText extends StatelessWidget {
   final Color? color;
   final TextAlign? textAlign;
   final bool? isUnderLine;
+  final bool? isEllipse;
 
   const TitleText({
     Key? key,
@@ -18,10 +19,17 @@ class TitleText extends StatelessWidget {
     this.color,
     this.isUnderLine,
     this.textAlign,
+    this.isEllipse,
   }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return Text(title, textAlign: textAlign, style: TextStyle(fontSize: fontSize, fontWeight: weight, color: color));
+    return Text(
+      title,
+      textAlign: textAlign,
+      overflow: isEllipse == true ? TextOverflow.ellipsis : null,
+      maxLines: isEllipse == true ? 1 : null,
+      style: TextStyle(fontSize: fontSize, fontWeight: weight, color: color),
+    );
   }
 }

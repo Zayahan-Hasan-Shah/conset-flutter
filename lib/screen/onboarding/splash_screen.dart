@@ -13,7 +13,8 @@ class SplashScreen extends StatefulWidget {
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMixin {
+class _SplashScreenState extends State<SplashScreen>
+    with TickerProviderStateMixin {
   AnimationController? _controller;
   Animation<double>? _animation;
   String? _appLogoPath;
@@ -34,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen> with TickerProviderStateMix
     _controller?.forward();
 
     // Set app logo path (replace with your actual path if needed)
-    _appLogoPath = AppAssets.clinicLogo; // Example path
+    _appLogoPath = AppAssets.coherentLogo; // Example path
 
     // Delayed navigation after animation (modify logic as needed)
     Future.delayed(const Duration(seconds: 3), () async {

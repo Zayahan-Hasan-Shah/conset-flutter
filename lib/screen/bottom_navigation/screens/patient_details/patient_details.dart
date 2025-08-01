@@ -132,6 +132,7 @@ class _PatientDetailsState extends ConsumerState<PatientDetails> {
                             title: TitleText(
                               title: fileName,
                               color: ColorAssets.whiteColor,
+                              isEllipse: true,
                             ),
                             trailing: const Icon(
                               Icons.picture_as_pdf_outlined,
@@ -202,6 +203,7 @@ class _PatientDetailsState extends ConsumerState<PatientDetails> {
                     title: TitleText(
                       title: fileName,
                       color: ColorAssets.primaryColor,
+                      isEllipse: true,
                     ),
                     subtitle: TitleText(
                       title: 'Unsigned',

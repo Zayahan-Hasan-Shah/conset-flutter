@@ -6,6 +6,7 @@ import 'package:conset/utils/global.dart';
 import 'package:conset/widgets/common_widgets/custom_app_bar.dart';
 import 'package:conset/widgets/common_widgets/custom_container.dart';
 import 'package:conset/widgets/common_widgets/custom_text_form.dart';
+import 'package:conset/widgets/common_widgets/title_text.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -66,87 +67,83 @@ class _DashboardScreenState extends ConsumerState<DashboardScreen> {
                   ref.read(apiLoaderProvider.notifier).state = true;
                   ref.read(apiLoaderProvider.notifier).state = false;
                 },
-                child:
-                    filteredList.isEmpty
-                        ? const Padding(
-                          padding: EdgeInsets.all(20),
-                          child: Text('No patients found'),
-                        )
-                        : LayoutBuilder(
-                          builder: (
-                            BuildContext context,
-                            BoxConstraints constraints,
-                          ) {
-                            return SingleChildScrollView(
-                              child: Column(
-                                children: [
-                                  SizedBox(height: 0.5.h),
-                                  Center(
-                                    child: Container(
-                                      width: 95.w,
-                                      height: 14.h,
-                                      decoration: BoxDecoration(
-                                        image: DecorationImage(
-                                          image: AssetImage(
-                                            AppAssets.appBackground,
-                                          ),
-                                          fit: BoxFit.cover,
-                                        ),
-                                        border: Border.all(
-                                          color: Colors.grey,
-                                          width: 2.0,
-                                        ),
-                                      ),
-                                      child: Center(
-                                        child: Image.asset(
-                                          AppAssets.clinicLogo,
-                                          width: 50.w,
-                                          fit: BoxFit.contain,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  buildSearchBar(),
-                                  ListView.builder(
-                                    shrinkWrap: true,
-                                    physics: NeverScrollableScrollPhysics(),
-                                    itemCount: filteredList.length,
-                                    itemBuilder: (context, index) {
-                                      final patient = filteredList[index];
-                                      return GestureDetector(
-                                        onTap: () {
-                                          context.push(
-                                            RoutesNames.patientDetailScreen,
-                                            extra: patient,
-                                          );
-                                        },
-                                        child: Padding(
-                                          padding: EdgeInsets.symmetric(
-                                            horizontal: 5.w,
-                                            vertical: 1.h,
-                                          ),
-                                          child: CustomContainer(
-                                            mrNo: patient.mrNo,
-                                            firstName: patient.firstName,
-                                            middleName: patient.middleName,
-                                            lastName: patient.lastName,
-                                            fullName: patient.fullName,
-                                            birthDate: patient.birthDate,
-                                            isVIP: patient.isVIP,
-                                            nationality: patient.nationality,
-                                            phone: patient.phone,
-                                            sex: patient.sex,
-                                            pdfUrls: patient.pdfUrls,
-                                          ),
-                                        ),
+                child: LayoutBuilder(
+                  builder: (BuildContext context, BoxConstraints constraints) {
+                    return SingleChildScrollView(
+                      child: Column(
+                        children: [
+                          SizedBox(height: 0.5.h),
+                          Center(
+                            child: Container(
+                              width: 95.w,
+                              height: 14.h,
+                              decoration: BoxDecoration(
+                                image: DecorationImage(
+                                  image: AssetImage(AppAssets.appBackground),
+                                  fit: BoxFit.cover,
+                                ),
+                                border: Border.all(
+                                  color: Colors.grey,
+                                  width: 2.0,
+                                ),
+                              ),
+                              child: Center(
+                                child: Image.asset(
+                                  AppAssets.coherentDashboard,
+                                  width: 70.w,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          buildSearchBar(),
+                          filteredList.isEmpty
+                              ? const Padding(
+                                padding: EdgeInsets.all(20),
+                                child: Center(
+                                  child: TitleText(title: 'No patients found'),
+                                ),
+                              )
+                              : ListView.builder(
+                                shrinkWrap: true,
+                                physics: NeverScrollableScrollPhysics(),
+                                itemCount: filteredList.length,
+                                itemBuilder: (context, index) {
+                                  final patient = filteredList[index];
+                                  return GestureDetector(
+                                    onTap: () {
+                                      context.push(
+                                        RoutesNames.patientDetailScreen,
+                                        extra: patient,
                                       );
                                     },
-                                  ),
-                                ],
+                                    child: Padding(
+                                      padding: EdgeInsets.symmetric(
+                                        horizontal: 5.w,
+                                        vertical: 1.h,
+                                      ),
+                                      child: CustomContainer(
+                                        mrNo: patient.mrNo,
+                                        firstName: patient.firstName,
+                                        middleName: patient.middleName,
+                                        lastName: patient.lastName,
+                                        fullName: patient.fullName,
+                                        birthDate: patient.birthDate,
+                                        isVIP: patient.isVIP,
+                                        nationality: patient.nationality,
+                                        phone: patient.phone,
+                                        sex: patient.sex,
+                                        pdfUrls: patient.pdfUrls,
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
-                            );
-                          },
-                        ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
               )
               : buildShimmerEffect(),
     );
